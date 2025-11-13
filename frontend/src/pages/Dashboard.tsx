@@ -1,7 +1,10 @@
 import React from 'react';
 import { api } from '../api';
 import { useAuth } from '../useAuth';
-import { formatINR } from '../utils/currency';
+import SweetCard from '../components/SweetCard';
+import SkeletonGrid from '../components/Skeleton';
+import SearchBar from '../components/SearchBar';
+import toast from 'react-hot-toast';
 
 type Sweet = {
   id: string;
@@ -46,44 +49,34 @@ export default function Dashboard() {
   };
 
   const purchase = async (id: string) => {
-    if (!auth) return alert('Please login');
+    if (!auth) {
+      toast.error('Please login to purchase');
+      return;
+    }
     try {
       await api.purchase(auth.token, id, 1);
+      toast.success('Purchased 🎉');
       await search();
     } catch (e: any) {
-      alert(e.message);
+      toast.error(e.message || 'Purchase failed');
     }
   };
 
   return (
     <>
-      <div className="card">
-        <h2>Search Indian Mithai</h2>
-        <input placeholder="Name (e.g., Gulab)" value={filters.name} onChange={(e) => setFilters({ ...filters, name: e.target.value })} />
-        <input placeholder="Category (e.g., Mithai/Bengali)" value={filters.category} onChange={(e) => setFilters({ ...filters, category: e.target.value })} />
-        <input placeholder="Min Price (₹)" value={filters.minPrice} onChange={(e) => setFilters({ ...filters, minPrice: e.target.value })} />
-        <input placeholder="Max Price (₹)" value={filters.maxPrice} onChange={(e) => setFilters({ ...filters, maxPrice: e.target.value })} />
-        <button className="primary" onClick={search}>Apply</button>
-        <button onClick={load}>Reset</button>
-      </div>
+      <SearchBar filters={filters} setFilters={setFilters} onSearch={search} onReset={load} />
 
-      {loading && <p>Loading...</p>}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      {!loading && sweets.length === 0 && <p>No mithai found. Try Reset or loosen your filters.</p>}
+      {loading && <SkeletonGrid count={6} />}
+      {error && <p style={{ color: '#fca5a5' }}>{error}</p>}
+      {!loading && sweets.length === 0 && <p className="empty">No mithai found. Try Reset or loosen your filters.</p>}
 
-      <div className="grid">
-        {sweets.map((s) => (
-          <div key={s.id} className="card">
-            <h3>{s.name}</h3>
-            <div>Category: {s.category}</div>
-            <div>Price: {formatINR(s.price)}</div>
-            <div>In stock: {s.quantity}</div>
-            <button className="primary" disabled={!auth || s.quantity === 0} onClick={() => purchase(s.id)}>
-              Purchase
-            </button>
-          </div>
-        ))}
-      </div>
+      {!loading && sweets.length > 0 && (
+        <div className="grid">
+          {sweets.map((s) => (
+            <SweetCard key={s.id} sweet={s} onPurchase={purchase} isAuthed={!!auth} />
+          ))}
+        </div>
+      )}
     </>
   );
 }

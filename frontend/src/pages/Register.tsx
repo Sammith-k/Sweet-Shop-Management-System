@@ -23,14 +23,15 @@ export default function Register() {
 
   return (
     <div className="card">
-      <h2>Register</h2>
-      <form onSubmit={onSubmit}>
+      <h2>Create Account</h2>
+      <p className="kicker">Shop your favourite mithai and enjoy sweet deals.</p>
+      <form onSubmit={onSubmit} style={{ display: 'grid', gap: 10, maxWidth: 520 }}>
         <input placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} />
         <input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
         <input placeholder="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-        <button className="primary">Create Account</button>
+        <button className="primary">Register</button>
       </form>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {error && <p style={{ color: '#fca5a5' }}>{error}</p>}
     </div>
   );
 }

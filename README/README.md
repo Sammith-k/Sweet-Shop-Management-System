@@ -1,120 +1,194 @@
-# Indian Mithai Shop Management System
+# Indian Mithai Shop – Frontend‑first SPA
 
-A full‑stack Sweet Shop (Mithai) management system built as a TDD kata.
+A modern, attractive single‑page application (SPA) that showcases an Indian sweet (mithai) catalogue with search, filters, images, and smooth UI polish. The app also includes an Admin area to manage items. Backend is a simple Node/Express API (already wired) and requires only a few commands to run.
 
-- Backend: Node.js + Express + TypeScript + Prisma (SQLite), JWT auth, role-based access (ADMIN/USER).
-- Frontend: React + Vite + TypeScript.
-- Price currency: Indian Rupees (₹, INR).
-- Seeded with popular Indian mithai (Gulab Jamun, Jalebi, Kaju Katli, etc.).
-- Purchase is atomic: stock never goes below zero.
+Focus: Frontend (React + Vite + TypeScript, HTML/CSS/JS)
 
 Admin credentials (seeded)
 - Email: admin@example.com
 - Password: Admin123!
 
-## Contents
+---
 
-- Features
-- Tech stack and structure
-- Quick start (Windows/macOS/Linux)
-- API endpoints
-- Running tests
-- Environment variables
-- Common issues / troubleshooting
-- Switching DB to Postgres (optional)
-- My AI Usage (required by assignment)
-- License
+## What makes the UI engaging
+
+- Clean, responsive “glass” design with gradient background.
+- Grid cards for mithai with image, category badge, INR price, stock, and CTA.
+- Image system with 3‑level fallback:
+  1) Local images from /public/mithai (fast and reliable),
+  2) Remote images (Wikipedia/Unsplash) if local is missing,
+  3) A colorful SVG placeholder with the mithai name (never shows a broken image).
+- Subtle animations and hover effects with pure CSS (no heavy UI framework).
+- INR currency formatting using Indian locale.
+- Search & filter toolbar (name, category, min/max price).
+- Skeleton loaders and friendly empty states.
 
 ---
 
-## Features
+## Frontend tech stack
 
-Backend (REST)
-- User registration and login (JWT).
-- Role-based authorization (ADMIN/USER).
-- Sweets (Mithai) CRUD for admins.
-- Inventory actions:
-  - Purchase (decrement stock).
-  - Restock (increment stock, admin only).
-- Search by name/category/price range (empty filters allowed).
-- SQLite database via Prisma (file-based; no server needed).
+- React 18, Vite, TypeScript
+- Plain CSS (frontend/src/styles.css)
+- Routing with react-router-dom
+- Utility helpers:
+  - src/utils/currency.ts – INR formatting
+  - src/assets/imageMap.ts – local/remote/placeholder image resolver
+- Components:
+  - src/components/SweetCard.tsx – mithai card on the dashboard
+  - src/components/AdminSweetCard.tsx – mithai card in Admin panel
+  - src/components/SearchBar.tsx – search and filter controls
+  - src/components/Skeleton.tsx – grid skeleton while loading
+- Pages:
+  - src/pages/Dashboard.tsx – catalogue with search/filter/purchase
+  - src/pages/Admin.tsx – add/edit/delete/restock (admin only)
+  - src/pages/Login.tsx, src/pages/Register.tsx
+- State:
+  - src/useAuth.tsx – very small auth context (stores JWT and user)
 
-Frontend (SPA)
-- Register / Login forms.
-- Dashboard lists all mithai and supports search/filter.
-- Purchase button disabled when quantity is 0.
-- Admin screen to add, edit, delete, and restock mithai.
-- Prices formatted as INR using Indian locale.
+Optional images
+- Place JPGs under: frontend/public/mithai/
+- Recommended names (match these so cards pick them automatically):
+  - gulab-jamun.jpg, jalebi.jpg, rasgulla.jpg, kaju-katli.jpg, besan-ladoo.jpg,
+    barfi.jpg, rasmalai.jpg, soan-papdi.jpg, peda.jpg, sandesh.jpg
+- If you don’t add local images, the app falls back to remote photos; if blocked, it shows a nice SVG placeholder with the mithai name.
 
 ---
 
-## Tech stack and structure
+## Quick start
+
+Prerequisites
+- Node.js 18+ (includes npm)
+- Tip for Windows PowerShell: if you see “npm.ps1 cannot be loaded…”, use `npm.cmd` instead of `npm` in all commands below.
+
+### 1) Start the backend (simple)
+
+Open a terminal in `sweet-shop/backend`:
+
+Copy-Item .env.example .env # (CMD: copy .env.example .env)
+npm.cmd install
+npm.cmd run db:migrate
+npm.cmd run db:seed # seeds Indian mithai + admin user
+npm.cmd run dev # API runs at http://localhost:4000
+
+
+That’s all you need on the backend.
+
+Health check: http://localhost:4000/api/health → {"status":"ok"}
+
+### 2) Start the frontend (main focus)
+
+Open a second terminal in `sweet-shop/frontend`:
+
+npm.cmd install
+
+cmd /c "echo VITE_API_URL=http://localhost:4000 > .env"
+npm.cmd run dev # App runs at http://localhost:5173
+
+
+Open http://localhost:5173
+
+Login as Admin (above) to see the Admin page and management actions.
+
+---
+
+## Using the app
+
+- Dashboard
+  - Browse all mithai in a responsive grid.
+  - Search by name (e.g., “gulab”), category (e.g., “Bengali”), min/max price in ₹.
+  - Purchase button buys quantity 1 and is disabled when stock is 0.
+
+- Admin (admin@example.com / Admin123!)
+  - Add new mithai: name, category, price (₹), quantity.
+  - Edit existing items (name/category/price).
+  - Restock (increase quantity).
+  - Delete items.
+
+---
+
+## Minimal backend reference (for completeness)
+
+API base: http://localhost:4000
+
+- POST /api/auth/register – { name, email, password }
+- POST /api/auth/login – { email, password } → { token, user }
+- GET /api/sweets – list all
+- GET /api/sweets/search?name=&category=&minPrice=&maxPrice= – all filters optional
+- POST /api/sweets – admin only
+- PUT /api/sweets/:id – admin only
+- DELETE /api/sweets/:id – admin only
+- POST /api/sweets/:id/purchase – auth required
+- POST /api/sweets/:id/restock – admin only
+
+Price is stored as a number (INR). Purchase is atomic (stock never goes negative).
+
+---
+
+## Project structure (frontend‑first)
 
 sweet-shop/
-├─ backend/ # Node.js + Express + TypeScript + Prisma
-│ ├─ prisma/ # Prisma schema + seed (Indian mithai)
-│ ├─ src/
-│ │ ├─ routes/ # auth.routes.ts, sweets.routes.ts
-│ │ ├─ tests/ # Jest + Supertest
-│ │ └─ ...
-│ └─ .env.example
-└─ frontend/ # React + Vite + TypeScript
-└─ src/
-├─ pages/ # Dashboard, Admin, Login, Register
-├─ utils/ # currency.ts (INR formatter)
-└─ api.ts
+├─ frontend/
+│ ├─ public/
+│ │ └─ mithai/ # optional local images (jpg)
+│ └─ src/
+│ ├─ assets/
+│ │ └─ imageMap.ts # local → remote → placeholder image logic
+│ ├─ components/
+│ │ ├─ AdminSweetCard.tsx
+│ │ ├─ SearchBar.tsx
+│ │ ├─ Skeleton.tsx
+│ │ └─ SweetCard.tsx
+│ ├─ pages/
+│ │ ├─ Admin.tsx
+│ │ ├─ Dashboard.tsx
+│ │ ├─ Login.tsx
+│ │ └─ Register.tsx
+│ ├─ utils/currency.ts
+│ ├─ api.ts # tiny fetch wrapper
+│ ├─ App.tsx
+│ ├─ main.tsx
+│ └─ styles.css # full custom theme (no UI framework)
+└─ backend/ # simple Node/Express API (unchanged)
+
+![alt text](<Screenshot 2025-11-13 154613.png>) ![alt text](<Screenshot 2025-11-13 155455.png>) ![alt text](<Screenshot 2025-11-13 154146.png>) ![alt text](<Screenshot 2025-11-13 154221.png>) ![alt text](<Screenshot 2025-11-13 154350.png>) ![alt text](<Screenshot 2025-11-13 154447.png>) ![alt text](<Screenshot 2025-11-13 154519.png>) ![alt text](<Screenshot 2025-11-13 154534.png>)
 
 
-Key libraries
-- Backend: express, jsonwebtoken, zod, prisma, bcryptjs, jest, supertest.
-- Frontend: react, react-router-dom, vite.
-
-
-
-
-![alt text](<Screenshot 2025-11-02 193922.png>) ![alt text](<Screenshot 2025-11-02 193959.png>) ![alt text](<Screenshot 2025-11-02 194116.png>) ![alt text](<Screenshot 2025-11-02 194145.png>) ![alt text](<Screenshot 2025-11-02 194315.png>) ![alt text](<Screenshot 2025-11-02 194402.png>)
-
-
-
-Login with:
-- admin@example.com / Admin123!
-
-Use the app:
-- Dashboard: browse/search mithai; purchase.
-- Admin: add/edit/delete/restock mithai.
 
 ---
 
-## API endpoints
+## Troubleshooting
 
-Base URL: http://localhost:4000
+- White screen
+  - Open DevTools → Console for errors.
+  - Ensure the backend is running at http://localhost:4000 (or update frontend .env VITE_API_URL).
+  - Hard refresh (Ctrl+Shift+R).
 
-Auth
-- POST /api/auth/register
-  - body: { name, email, password }
-- POST /api/auth/login
-  - body: { email, password }
-  - returns: { token, user }
+- Images not visible
+  - Add JPGs to `frontend/public/mithai/` with the names listed above.
+  - If not present, the app tries remote URLs; if blocked by network, it shows a generated SVG placeholder (so cards are never empty).
 
-Sweets (public reads)
-- GET /api/sweets
-- GET /api/sweets/search?name=&category=&minPrice=&maxPrice=
-  - All filters optional; empty filters are ignored.
+- PowerShell blocks npm
+  - Use `npm.cmd` (e.g., `npm.cmd install`, `npm.cmd run dev`), or run once:
+    `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force`
 
-Sweets (admin only for writes)
-- POST /api/sweets
-  - body: { name, category, price, quantity }
-- PUT /api/sweets/:id
-  - body: any of { name, category, price, quantity }
-- DELETE /api/sweets/:id
+- Empty list on dashboard
+  - Reseed the backend:
+    ```
+    cd sweet-shop/backend
+    npm.cmd run db:reset
+    npm.cmd run db:seed
+    ```
+  - Click “Reset” on the dashboard to reload all items.
 
-Inventory
-- POST /api/sweets/:id/purchase        (auth required)
-  - body: { quantity: number > 0 }
-- POST /api/sweets/:id/restock         (admin)
-  - body: { quantity: number > 0 }
+---
 
-Notes
-- price is a number in INR (Float in SQLite).
-- purchase uses an atomic update; fails if insufficient stock.
+## My AI Usage (required by assignment)
 
+I used an AI assistant to:
+- Bootstrap the React/Vite/TypeScript frontend and write initial components.
+- Design the theme (gradients, glass cards) and build the responsive grid/CSS.
+- Implement image fallback logic (local → remote → placeholder) and skeleton loaders.
+- Write the README and quick‑start steps.
+I reviewed and adapted all code, localized currency to INR, and tested the full flow with the provided backend.
+
+Example commit trailer:

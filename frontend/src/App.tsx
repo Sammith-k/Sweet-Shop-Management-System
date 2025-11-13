@@ -12,23 +12,25 @@ export default function App() {
   return (
     <>
       <header>
-        <nav className="container">
-          <Link to="/">Indian Sweet Shop</Link>
-          <span style={{ float: 'right' }}>
+        <div className="nav">
+          <Link to="/" className="brand">Indian Mithai Shop</Link>
+          <div>
             {auth ? (
               <>
-                <span style={{ marginRight: 8 }}>{auth.user.name} ({auth.user.role})</span>
-                {auth.user.role === 'ADMIN' && <Link to="/admin" style={{ marginRight: 8 }}>Admin</Link>}
-                <button onClick={() => { logout(); navigate('/'); }} className="danger">Logout</button>
+                <span style={{ marginRight: 12, color: '#94a3b8' }}>
+                  {auth.user.name} ({auth.user.role})
+                </span>
+                {auth.user.role === 'ADMIN' && <Link to="/admin" style={{ marginRight: 12 }}>Admin</Link>}
+                <button className="danger" onClick={() => { logout(); navigate('/'); }}>Logout</button>
               </>
             ) : (
               <>
                 <Link to="/login">Login</Link>
-                <Link to="/register" style={{ marginLeft: 8 }}>Register</Link>
+                <Link to="/register" style={{ marginLeft: 12 }}>Register</Link>
               </>
             )}
-          </span>
-        </nav>
+          </div>
+        </div>
       </header>
 
       <div className="container">

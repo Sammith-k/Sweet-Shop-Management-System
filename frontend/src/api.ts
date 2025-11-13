@@ -33,16 +33,16 @@ export const api = {
     if (!res.ok) throw new Error('Failed to load');
     return res.json();
   },
- async search(params: { name?: string; category?: string; minPrice?: string; maxPrice?: string }) {
-  const filtered: Record<string, string> = {};
-  for (const [k, v] of Object.entries(params)) {
-    if (v != null && String(v).trim() !== '') filtered[k] = String(v).trim();
-  }
-  const q = new URLSearchParams(filtered).toString();
-  const res = await fetch(`${API_URL}/api/sweets/search${q ? `?${q}` : ''}`);
-  if (!res.ok) throw new Error((await res.json()).message || 'Failed to load');
-  return res.json();
-},
+  async search(params: { name?: string; category?: string; minPrice?: string; maxPrice?: string }) {
+    const filtered: Record<string, string> = {};
+    for (const [k, v] of Object.entries(params)) {
+      if (v != null && String(v).trim() !== '') filtered[k] = String(v).trim();
+    }
+    const q = new URLSearchParams(filtered).toString();
+    const res = await fetch(`${API_URL}/api/sweets/search${q ? `?${q}` : ''}`);
+    if (!res.ok) throw new Error((await res.json()).message || 'Failed to load');
+    return res.json();
+  },
   async addSweet(token: string, data: any) {
     const res = await fetch(`${API_URL}/api/sweets`, {
       method: 'POST',

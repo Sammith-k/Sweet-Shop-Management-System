@@ -23,12 +23,13 @@ export default function Login() {
   return (
     <div className="card">
       <h2>Login</h2>
-      <form onSubmit={onSubmit}>
+      <p className="kicker">Use the seeded admin or create your own account.</p>
+      <form onSubmit={onSubmit} style={{ display: 'grid', gap: 10, maxWidth: 520 }}>
         <input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
         <input placeholder="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
         <button className="primary">Login</button>
       </form>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {error && <p style={{ color: '#fca5a5' }}>{error}</p>}
     </div>
   );
 }
